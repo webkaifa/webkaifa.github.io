@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://cdn.staticfile.org/vue/2.2.2/vue.min.js"></script>
+    <script src="https://cdn.staticfile.org/axios/0.18.0/axios.min.js"></script>
+</head>
+<body>
+    <div id="app" >
+    			<p>搜索歌曲或者歌手</p>
+          <input type="text" v-model="query" @keyup.enter="searchMusic" style="float:left">
+          <ul style="float:left">
+              <li v-for="item in musiclist">{{item.name}}
+                  <button @click="getmusic(item.id)">播放歌曲</button><button v-if="item.mvid!=0" @click="playmv(item.mvid)">播放mv</button>
+              </li>
+          </ul>
+          <audio  :src="musicurl" controls autoplay loop style="float:left"></audio>
+          <video :src="mvurl" controls v-show="isShow" style="float:right" width=500></video >
+          
+    </div>
+  
+    <script>
+    var app =new Vue({
+        el:'#app',
+        data:{
+            query:"",
+            musiclist:[],
+            musicurl:"",
+            mvurl:"",
+            isShow:false
+        },
+        methods: {
+            searchMusic:function(){
+                var that=this;
+                axios.get("https://autumnfish.cn/search?keywords="+this.query).then(function(response){
+                    // console.log(response)
+                    that.musiclist=response.data.result.songs;
+                    console.log(response.data.result.songs)
+                },function(err){})
+               
+            },
+        getmusic:function(musicId){
+            var that=this;
+            axios.get("https://autumnfish.cn/song/url?id="+musicId).then(function(response){
+                // console.log(response)
+                that.musicurl=response.data.data[0].url
+                console.log(response.data.data[0].url)
+            },function(err){
+            })
+        },
+        playmv:function(mvid){
+            var that=this;
+            axios.get("https://autumnfish.cn/mv/url?id="+mvid).then(function(response){
+                console.log(response)
+                that.mvurl=response.data.data.url
+                console.log(response.data.data.url)
+               that.isShow=true;
+            },function(err){})
+        }
+        },
+    })
+    </script>
+</body>
+</html>
